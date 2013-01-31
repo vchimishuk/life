@@ -89,7 +89,7 @@ others will be born, so population will be completly different."
                     (born new-map y x)
                     (if (and (equal neighbors 2) (alivep map y x))
                         (born new-map y x)
-                        (kill new-map x y))))))
+                        (kill new-map y x))))))
     new-map))
 
 (defun live-one-generation (map)

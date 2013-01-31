@@ -9,6 +9,13 @@
 
 (in-package :life)
 
+(require 'asdf)
+(require 'uffi)
+
+(asdf:operate 'asdf:load-op :uffi)
+(asdf:oos 'asdf:load-op 'cl-ncurses)
+
+(cl-ncurses:initscr)
 
 ; One generation lifetime.
 (defparameter *generation-lifetime* 1)
@@ -18,7 +25,10 @@
 (defparameter *dead* 0)
 ; Alive cell state.
 (defparameter *alive* 1)
-
+; Live cell character for visualization.
+(defparameter *alive-char* "o")
+; Dead cell character for visualization.
+(defparameter *dead-char* " ")
 
 (defun create-map (size)
   "Creates new map object with given size."
@@ -92,9 +102,19 @@ others will be born, so population will be completly different."
                         (kill new-map y x))))))
     new-map))
 
+(defun print-map (map)
+  "Print map on the screen."
+  (let ((max-index (1- (array-dimension map 0))))
+    (loop for y from 0 to max-index do
+         (loop for x from 0 to max-index do
+              (cl-ncurses:mvprintw y x (if (alivep map y x)
+                                           *alive-char*
+                                           *dead-char*)))))
+  (cl-ncurses:refresh))
+
 (defun live-one-generation (map)
   "Live one generation."
-  (print map)
+  (print-map map)
   (sleep *generation-lifetime*)
   (live-one-generation (next-generation map)))
 
@@ -102,3 +122,5 @@ others will be born, so population will be completly different."
   "Let the game begins!"
   (let ((size (max size *min-map-size*)))
     (live-one-generation (init-map (create-map size)))))
+
+(life 10)
